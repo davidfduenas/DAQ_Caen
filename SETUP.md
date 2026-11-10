@@ -172,7 +172,7 @@ timeout 900s ./daq_threshold_v1.0.0 -n 999999999 -m self -c 0 -t 50 -r 2048 --po
 ## Automatic installation and Docker
 The [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) repo bundles all three repos. It provides:
 - `install.sh`, which performs sections 2 to 6 on Debian/Ubuntu (the CAEN libraries are installed by hand first);
-- a Docker setup (`DOCKER.md`) with InfluxDB, Grafana and a container that has ROOT, the CAEN libraries, the DAQ programs and the HV tools.
+- a Docker setup (`DOCKER.md`) with InfluxDB, Grafana and a container that has ROOT, the CAEN libraries, the DAQ programs and the HV tools. It has been tested except for one thing: we do not know yet whether USB access from Docker to the real devices works. If it does not, use the native install.
 
 ## Credits
 The DAQ code, utilities and monitor in these repos were written by **Bruno P. Gelli** ([BrunoGelli/DAQ_Caen](https://github.com/BrunoGelli/DAQ_Caen) and [BrunoGelli/caen-dt5533e-monitor](https://github.com/BrunoGelli/caen-dt5533e-monitor)). The forks only contain small lab-specific modifications. Please credit the original repositories when using or citing this work.
