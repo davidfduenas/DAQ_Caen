@@ -33,9 +33,32 @@ INFLUX_DB=mydb HV_SERIAL_PORT=/dev/ttyACM0 ~/tmuxsessions/start_hvcaen.sh
 sudo apt install tmux git g++ python3-venv python3-tk python3-numpy python3-matplotlib libcurl4-openssl-dev
 ```
 (`python3-numpy` and `python3-matplotlib` are needed by `scope.py`.)
-- CAEN libraries: follow Bruno Gelli's instructions in [BrunoGelli/Legacy-AmBE_DAQ_DQM](https://github.com/BrunoGelli/Legacy-AmBE_DAQ_DQM) (`README.md` and `Singularity.def`: CAENVMELib, CAENComm, caen_felib, caen_dig2, CAENDigitizer, in that order). Summary: [CONTAINER.md](https://github.com/davidfduenas/caen-lab-setup/blob/main/CONTAINER.md).
+- CAEN libraries: see "CAEN libraries" below.
 - ROOT (default location `~/root`).
 - InfluxDB v1 and Grafana.
+
+### CAEN libraries
+
+The DAQ needs the CAEN libraries. Bruno's [DAQ_Caen](https://github.com/BrunoGelli/DAQ_Caen) README lists them as a requirement but gives no installation steps. They are downloaded from CAEN's website (registration required).
+
+Versions on the lab machine where the DAQ works (output of `ldconfig -p | grep -i caen`):
+
+| Library | Version | Location |
+|---|---|---|
+| CAENVME | v4.1.3 | `/usr/lib` |
+| CAENComm | v1.8.0 | `/usr/lib` |
+| CAENDigitizer | v2.19.0 | `/usr/lib` (header: `/usr/include/CAENDigitizer.h`) |
+
+`caen_felib` and `caen_dig2` are not installed there and are not needed for the DT5730S.
+
+Install them in the order CAENVME, CAENComm, CAENDigitizer. As a reference, Bruno's older repository [Legacy-AmBE_DAQ_DQM](https://github.com/BrunoGelli/Legacy-AmBE_DAQ_DQM) (see its `Singularity.def`) installs each of these by running `sh install_x64` inside the package's `lib` folder. His versions there are older (4.0.2, 1.7.0, 2.18.0), and that repository builds a container, which the lab does not use.
+
+Check that they are installed:
+```bash
+ldconfig -p | grep -i caen                        # libCAENVME, libCAENComm, libCAENDigitizer
+ls /usr/include/CAENDigitizer.h                   # header used to compile the DAQ
+printf '#include <CAENDigitizer.h>\nint main(){return 0;}\n' | g++ -x c++ - -lCAENDigitizer -o /tmp/caen_test && echo "CAEN libraries OK"
+```
 
 ## 3. Database and Grafana
 ```bash
@@ -125,7 +148,7 @@ timeout 900s ./daq_threshold_v1.0.0 -n 999999999 -m self -c 0 -t 50 -r 2048 --po
 | `/dev/ttyDT5471P0` missing | udev IDs don't match `lsusb`; redo section 6. |
 | Supply silent, name present | `sudo systemctl stop ModemManager`. |
 | Permission denied on the port | `sudo usermod -aG dialout $USER`, log in again. |
-| "Failed to open digitizer" | Check the CAEN library install against Bruno's instructions; if it works under `sudo`, add a USB permission rule for the digitizer. |
+| "Failed to open digitizer" | Check the CAEN libraries with the commands in section 2; if it works under `sudo`, add a USB permission rule for the digitizer. |
 | `scope` shows no window | Install `python3-tk`. |
 
 ## Automatic installation
