@@ -120,6 +120,8 @@ With several supplies, add `ATTRS{serial}=="<number>"` (from `udevadm info -a -n
 The digitizer needs no name: the DAQ opens it by USB link number.
 
 ## 7. First test (HV supply off)
+Each launcher fills the terminal window it is started in, so use a separate terminal for each (or leave one with `Ctrl-b` then `d`, then start the next). The layout is one wide pane on top and two below.
+
 1. `~/tmuxsessions/start_digcaen.sh`: the top pane prints "Temperatures sent".
 2. `./daq_threshold_v1.0.0 -n 100 -m sw -c 0 -r 1500 --txt data/test.txt`, then run `scope`.
 3. `~/tmuxsessions/start_hvcaen.sh`, type `start` in the top pane, check VMON and IMON in Grafana.
@@ -164,6 +166,8 @@ timeout 900s ./daq_threshold_v1.0.0 -n 999999999 -m self -c 0 -t 50 -r 2048 --po
 | Permission denied on the port | `sudo usermod -aG dialout $USER`, log in again. |
 | "Failed to open digitizer" | Check the CAEN libraries with the commands in section 2; if it works under `sudo`, add a USB permission rule for the digitizer. |
 | `scope` shows no window | Install `python3-tk`. |
+| Launcher shows the wrong number of panes, or prints `size missing` | Old launcher version (before the tmux 3.4 fix). Update the `tmuxsessions` repo (`git pull`). |
+| HV panes end with `could not open port /dev/ttyDT5471P0` | The supply is not connected or not named: see section 6. Expected when testing without devices. |
 
 ## Automatic installation and Docker
 The [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) repo bundles all three repos. It provides:
