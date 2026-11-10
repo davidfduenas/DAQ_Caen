@@ -67,11 +67,11 @@ ls /usr/include/CAENDigitizer.h                   # header used to compile the D
 printf '#include <CAENDigitizer.h>\nint main(){return 0;}\n' | g++ -x c++ - -lCAENDigitizer -o /tmp/caen_test && echo "CAEN libraries OK"
 ```
 
-To use the same libraries in the Docker container, pack the installed files on the machine where they work:
+The caen-lab-setup repo includes these three libraries and their headers as `docker/caen/caen-installed.tgz`, made on the lab machine with:
 ```bash
 tar -czf ~/caen-installed.tgz /usr/lib/libCAEN* /usr/include/CAEN*
 ```
-Then put `caen-installed.tgz` in `docker/caen/` of caen-lab-setup (see its `DOCKER.md`). Keep that file private: the files in it are CAEN's, so do not publish it.
+`install.sh` installs it system-wide on a new machine (native install), and the Docker build installs it inside the image (see its `DOCKER.md`). They are CAEN's files: see `docker/caen/NOTICE.md` in that repo for what they are and the terms we know of.
 
 ## 3. Database and Grafana
 ```bash
