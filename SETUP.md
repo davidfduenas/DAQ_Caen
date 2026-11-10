@@ -10,6 +10,13 @@ This fork of [BrunoGelli/DAQ_Caen](https://github.com/BrunoGelli/DAQ_Caen) is us
 
 Branch `lab-setup` of each fork holds the lab modifications.
 
+There are three ways to set this up:
+1. **Automatic installer:** `install.sh` in [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) (Debian/Ubuntu).
+2. **Manual steps:** sections 2 to 7 of this document.
+3. **Docker:** see `DOCKER.md` in caen-lab-setup.
+
+In every case you need the CAEN libraries (section 2) and, for the HV supply, the udev rule (section 6).
+
 ## 1. What you must adapt to your setup
 
 | Item | Where | Default |
@@ -51,7 +58,7 @@ Versions on the lab machine where the DAQ works (output of `ldconfig -p | grep -
 
 `caen_felib` and `caen_dig2` are not installed there and are not needed for the DT5730S.
 
-Install them in the order CAENVME, CAENComm, CAENDigitizer. As a reference, Bruno's older repository [Legacy-AmBE_DAQ_DQM](https://github.com/BrunoGelli/Legacy-AmBE_DAQ_DQM) (see its `Singularity.def`) installs each of these by running `sh install_x64` inside the package's `lib` folder. His versions there are older (4.0.2, 1.7.0, 2.18.0), and that repository builds a container, which the lab does not use.
+Install them in the order CAENVME, CAENComm, CAENDigitizer. As a reference, Bruno's older repository [Legacy-AmBE_DAQ_DQM](https://github.com/BrunoGelli/Legacy-AmBE_DAQ_DQM) (see its `Singularity.def`) installs each of these by running `sh install_x64` inside the package's `lib` folder. His versions there are older (4.0.2, 1.7.0, 2.18.0), and that repository builds an Apptainer container, which is separate from this setup.
 
 Check that they are installed:
 ```bash
@@ -59,6 +66,12 @@ ldconfig -p | grep -i caen                        # libCAENVME, libCAENComm, lib
 ls /usr/include/CAENDigitizer.h                   # header used to compile the DAQ
 printf '#include <CAENDigitizer.h>\nint main(){return 0;}\n' | g++ -x c++ - -lCAENDigitizer -o /tmp/caen_test && echo "CAEN libraries OK"
 ```
+
+To use the same libraries in the Docker container, pack the installed files on the machine where they work:
+```bash
+tar -czf ~/caen-installed.tgz /usr/lib/libCAEN* /usr/include/CAEN*
+```
+Then put `caen-installed.tgz` in `docker/caen/` of caen-lab-setup (see its `DOCKER.md`). Keep that file private: the files in it are CAEN's, so do not publish it.
 
 ## 3. Database and Grafana
 ```bash
@@ -86,7 +99,7 @@ cd ~/DAQ_Caen
 g++ -O2 -std=c++17 daq_threshold_v1.0.0.cpp -o daq_threshold_v1.0.0 $(root-config --cflags --libs) -lCAENDigitizer
 g++ -O2 -std=c++17 utils/read_temp_influx.cpp -o utils/read_temp_influx -lCAENDigitizer -lcurl
 ```
-The second command has not been tested; adjust library flags if linking fails.
+Both commands compiled successfully in the Docker container (Ubuntu 24.04, ROOT 6.32.04, CAEN libraries v4.1.3 / v1.8.0 / v2.19.0). The only warnings say that `CAEN_DGTZ_OpenDigitizer` is deprecated since CAENDigitizer 2.18.
 
 Optional alias for the live viewer: `alias scope='python3 ~/DAQ_Caen/scope.py'`.
 
@@ -151,8 +164,10 @@ timeout 900s ./daq_threshold_v1.0.0 -n 999999999 -m self -c 0 -t 50 -r 2048 --po
 | "Failed to open digitizer" | Check the CAEN libraries with the commands in section 2; if it works under `sudo`, add a USB permission rule for the digitizer. |
 | `scope` shows no window | Install `python3-tk`. |
 
-## Automatic installation
-The [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) repo bundles all three repos and an `install.sh` that performs sections 2 to 6 on Debian/Ubuntu.
+## Automatic installation and Docker
+The [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) repo bundles all three repos. It provides:
+- `install.sh`, which performs sections 2 to 6 on Debian/Ubuntu (the CAEN libraries are installed by hand first);
+- a Docker setup (`DOCKER.md`) with InfluxDB, Grafana and a container that has ROOT, the CAEN libraries, the DAQ programs and the HV tools.
 
 ## Credits
 The DAQ code, utilities and monitor in these repos were written by **Bruno P. Gelli** ([BrunoGelli/DAQ_Caen](https://github.com/BrunoGelli/DAQ_Caen) and [BrunoGelli/caen-dt5533e-monitor](https://github.com/BrunoGelli/caen-dt5533e-monitor)). The forks only contain small lab-specific modifications. Please credit the original repositories when using or citing this work.
