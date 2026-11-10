@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
-#source "/home/ANNIE/daq/orchestrator/.env"
+#source "/home/dduenas/DAQ_Caen/orchestrator/.env"
 
 export INFLUX_HOST INFLUX_PORT INFLUX_DB INFLUX_USER INFLUX_PASS
 export DATA_DIR UTILS_DIR SW_BIN TH_BIN
 
 # -------- defaults if .env doesn't define them --------
-: "${UTILS_DIR:=/home/ANNIE/daq/utils}"
-: "${DATA_DIR:=/home/ANNIE/daq/data}"
-: "${SW_BIN:=/home/ANNIE/daq/daq_threshold_v1.0.0}"
+: "${UTILS_DIR:=/home/dduenas/DAQ_Caen/utils}"
+: "${DATA_DIR:=/home/dduenas/DAQ_Caen/data}"
+: "${SW_BIN:=/home/dduenas/DAQ_Caen/daq_threshold_v1.0.0}"
 : "${TH_BIN:=${SW_BIN}}"
 
 : "${DAQ_CHANNEL:=0}"
@@ -17,12 +17,12 @@ export DATA_DIR UTILS_DIR SW_BIN TH_BIN
 : "${SW_N_EVENTS:=1000}"
 
 # Influx v1 (optional defaults)
-: "${INFLUX_HOST:=192.168.197.46}"
+: "${INFLUX_HOST:=127.0.0.1}"
 : "${INFLUX_PORT:=8086}"
-: "${INFLUX_DB:=AmBeHV}"
+: "${INFLUX_DB:=NOvA_DTG_CAEN}"
 
 # -------- single-host lock to avoid CAEN collisions --------
-lock="/home/ANNIE/daq/.caen.lock"
+lock="/home/dduenas/DAQ_Caen/.caen.lock"
 exec 9>"$lock"
 flock -n 9 || { echo "[warn] DAQ busy (lock)"; exit 0; }
 

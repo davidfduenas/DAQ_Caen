@@ -29,6 +29,7 @@
 #include <chrono>
 #include <algorithm>
 #include <fstream>
+#include <iomanip>
 #include <vector>
 #include <limits>
 #include <sys/stat.h>
@@ -47,6 +48,11 @@ static void die(const char* where, CAEN_DGTZ_ErrorCode ec){
 }
 static void ok(const char* where, CAEN_DGTZ_ErrorCode ec){
     if(ec!=CAEN_DGTZ_Success) die(where,ec);
+}
+
+static double unix_now(){
+    using namespace std::chrono;
+    return duration_cast<duration<double>>(system_clock::now().time_since_epoch()).count();
 }
 
 static void ensure_dir_exists(const std::string& dir){
@@ -166,13 +172,35 @@ int main(int argc,char**argv){
 
     CAEN_DGTZ_BoardInfo_t bi{}; ok("GetInfo", CAEN_DGTZ_GetInfo(handle, &bi));
     printf("[board] Model=%s  ROC=%s  AMC=%s  Ch=%u\n", bi.ModelName, bi.ROC_FirmwareRel, bi.AMC_FirmwareRel, bi.Channels);
-
-    // Program basics
     ok("SetAcqMode", CAEN_DGTZ_SetAcquisitionMode(handle, CAEN_DGTZ_SW_CONTROLLED));
-    ok("SetChannelEnableMask", CAEN_DGTZ_SetChannelEnableMask(handle, 0xFF)); // enable all
+   
+   
+   
+   
+    uint32_t fsr_reg;
+    CAEN_DGTZ_ReadRegister(handle, 0x1028, &fsr_reg);
+    printf("[check] FSR register (ch0) = 0x%X\n", fsr_reg);
+   
+
+   
+    // Controls how many channels get read out per event. More channels =
+    // more USB bandwidth used per trigger. Set to 0x03 (ch0+ch1) instead of
+    // 0x01 (ch0 alone) because 0x01 has not been tested with this code (DTG Run).
+    //
+    // Individual channels: ch0=0x01  ch1=0x02  ch2=0x04  ch3=0x08
+    //                       ch4=0x10  ch5=0x20  ch6=0x40  ch7=0x80
+    // Adjacent pairs:       ch0+ch1=0x03  ch2+ch3=0x0C  ch4+ch5=0x30  ch6+ch7=0xC0  
+    // Groups of 4:          ch0-ch3=0x0F  ch4-ch7=0xF0
+    // All 8 (ch0-ch7):      0xFF
+    // Program basics
+    ok("SetChannelEnableMask", CAEN_DGTZ_SetChannelEnableMask(handle, 0x03));
     ok("SetRecordLength", CAEN_DGTZ_SetRecordLength(handle, recLen));
     ok("SetPostTriggerSize", CAEN_DGTZ_SetPostTriggerSize(handle, post));
     ok("SetMaxNumEventsBLT", CAEN_DGTZ_SetMaxNumEventsBLT(handle, 1023));
+
+    uint32_t postTriggerReg;
+    CAEN_DGTZ_ReadRegister(handle, 0x8114, &postTriggerReg);
+    printf("[check] PostTrigger register = %u\n", postTriggerReg);
 
     // Polarity/edge for negative pulses
     for(int i=0;i<8;++i){
@@ -343,7 +371,8 @@ int main(int argc,char**argv){
                     if(fout.is_open()){
                         fout << "# Event " << got << "  tag=" << tag << "  trig=" << trig
                              << "  ch=" << ch << "  size=" << ns
-                             << "  cnt=" << info.EventCounter << "  ttag=" << info.TriggerTimeTag << "\n";
+                             << "  cnt=" << info.EventCounter << "  ttag=" << info.TriggerTimeTag
+                             << "  unixtime=" << std::fixed << std::setprecision(6) << unix_now() << "\n";
                         for(uint32_t s=0; s<ns; ++s) fout << e->DataChannel[ch][s] << "\n";
                         fout << "\n";
                     } else {
@@ -352,7 +381,8 @@ int main(int argc,char**argv){
                 } else if(txt_out.is_open()){
                     txt_out << "# Event " << got << "  tag=" << tag << "  trig=" << trig
                             << "  ch=" << ch << "  size=" << ns
-                            << "  cnt=" << info.EventCounter << "  ttag=" << info.TriggerTimeTag << "\n";
+                            << "  cnt=" << info.EventCounter << "  ttag=" << info.TriggerTimeTag
+                            << "  unixtime=" << std::fixed << std::setprecision(6) << unix_now() << "\n";
                     for(uint32_t s=0; s<ns; ++s) txt_out << e->DataChannel[ch][s] << "\n";
                     txt_out << "\n";
                 }

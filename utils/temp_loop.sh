@@ -2,12 +2,12 @@
 set -euo pipefail
 
 while true; do
-  flock -n /home/ANNIE/daq/.caen.lock /home/ANNIE/daq/utils/read_temp_influx \
-    --influx-host 192.168.197.46 \
+  flock -n /home/dduenas/DAQ_Caen/.caen.lock /home/dduenas/DAQ_Caen/utils/read_temp_influx \
+    --influx-host 127.0.0.1 \
     --influx-port 8086 \
-    --influx-db AmBeHV \
+    --influx-db NOvA_DTG_CAEN \
     --measurement DT5730S \
-    --once >>/home/ANNIE/daq/logs/temp_influx.log 2>&1 || true
+    --once >>/home/dduenas/DAQ_Caen/logs/temp_influx.log 2>&1 || true
 
   sleep 5
 done
