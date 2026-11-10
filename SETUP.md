@@ -37,9 +37,10 @@ INFLUX_DB=mydb HV_SERIAL_PORT=/dev/ttyACM0 ~/tmuxsessions/start_hvcaen.sh
 
 ## 2. Install
 ```bash
-sudo apt install tmux git g++ python3-venv python3-tk python3-numpy python3-matplotlib libcurl4-openssl-dev
+sudo apt install tmux git g++ build-essential curl unzip python3-venv python3-tk python3-numpy python3-matplotlib \
+  libcurl4-openssl-dev libssl-dev libx11-dev libxpm-dev libxft-dev libxext-dev libusb-1.0-0-dev libtbb-dev
 ```
-(`python3-numpy` and `python3-matplotlib` are needed by `scope.py`.)
+(`python3-numpy` and `python3-matplotlib` are needed by `scope.py`. `libtbb-dev` is needed by the ROOT binary download: without it, compiling the DAQ fails with `libtbb.so.12 ... not found`.)
 - CAEN libraries: see "CAEN libraries" below.
 - ROOT (default location `~/root`).
 - InfluxDB v1 and Grafana.
