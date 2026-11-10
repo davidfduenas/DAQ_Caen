@@ -89,6 +89,8 @@ The digitizer needs no name: the DAQ opens it by USB link number.
 
 ## 8. Operation
 
+The lab's original operating instructions (HV and DAQ in WSL) are in this Google Doc, which may require access: [Operating Instructions](https://docs.google.com/document/d/1mQslpxoBDvs9HkDt69Xr__bFLzD0LlA4ytbHnuLEeo8/edit?tab=t.0). This section is based on it.
+
 **HV** (`start_hvcaen.sh`, three panes: monitor, voltage, current)
 1. Top pane: `start` (logs to InfluxDB).
 2. Current pane: `set iset 200`.
