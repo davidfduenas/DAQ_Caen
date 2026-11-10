@@ -10,12 +10,9 @@ This fork of [BrunoGelli/DAQ_Caen](https://github.com/BrunoGelli/DAQ_Caen) is us
 
 Branch `lab-setup` of each fork holds the lab modifications.
 
-There are three ways to set this up:
-1. **Automatic installer:** `install.sh` in [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) (Debian/Ubuntu).
-2. **Manual steps:** sections 2 to 7 of this document.
-3. **Docker:** see `DOCKER.md` in caen-lab-setup.
+This document describes the **manual** direct install (sections 2 to 7). A script that does sections 2 to 6 automatically is described in `NATIVE.md` of [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup).
 
-In every case you need the CAEN libraries (section 2) and, for the HV supply, the udev rule (section 6).
+You need the CAEN libraries (section 2) and, for the HV supply, the udev rule (section 6).
 
 ## 1. What you must adapt to your setup
 
@@ -72,7 +69,7 @@ The caen-lab-setup repo includes these three libraries and their headers as `doc
 ```bash
 tar -czf ~/caen-installed.tgz /usr/lib/libCAEN* /usr/include/CAEN*
 ```
-`install.sh` installs it system-wide on a new machine (native install), and the Docker build installs it inside the image (see its `DOCKER.md`). They are CAEN's files: see `docker/caen/NOTICE.md` in that repo for what they are and the terms we know of.
+`install.sh` in that repo installs it system-wide on a new machine. They are CAEN's files: see `docker/caen/NOTICE.md` in that repo for what they are and the terms we know of.
 
 ## 3. Database and Grafana
 ```bash
@@ -100,7 +97,7 @@ cd ~/DAQ_Caen
 g++ -O2 -std=c++17 daq_threshold_v1.0.0.cpp -o daq_threshold_v1.0.0 $(root-config --cflags --libs) -lCAENDigitizer
 g++ -O2 -std=c++17 utils/read_temp_influx.cpp -o utils/read_temp_influx -lCAENDigitizer -lcurl
 ```
-Both commands compiled successfully in the Docker container (Ubuntu 24.04, ROOT 6.32.04, CAEN libraries v4.1.3 / v1.8.0 / v2.19.0). The only warnings say that `CAEN_DGTZ_OpenDigitizer` is deprecated since CAENDigitizer 2.18.
+Both commands compiled successfully on Ubuntu 24.04 with ROOT 6.32.04 and the CAEN libraries v4.1.3 / v1.8.0 / v2.19.0. The only warnings say that `CAEN_DGTZ_OpenDigitizer` is deprecated since CAENDigitizer 2.18.
 
 Optional alias for the live viewer: `alias scope='python3 ~/DAQ_Caen/scope.py'`.
 
@@ -169,10 +166,8 @@ timeout 900s ./daq_threshold_v1.0.0 -n 999999999 -m self -c 0 -t 50 -r 2048 --po
 | Launcher shows the wrong number of panes, or prints `size missing` | Old launcher version (before the tmux 3.4 fix). Update the `tmuxsessions` repo (`git pull`). |
 | HV panes end with `could not open port /dev/ttyDT5471P0` | The supply is not connected or not named: see section 6. Expected when testing without devices. |
 
-## Automatic installation and Docker
-The [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) repo bundles all three repos. It provides:
-- `install.sh`, which performs sections 2 to 6 on Debian/Ubuntu (the CAEN libraries are installed by hand first);
-- a Docker setup (`DOCKER.md`) with InfluxDB, Grafana and a container that has ROOT, the CAEN libraries, the DAQ programs and the HV tools. It has been tested except for one thing: we do not know yet whether USB access from Docker to the real devices works. If it does not, use the native install.
+## Automatic installation
+The [caen-lab-setup](https://github.com/davidfduenas/caen-lab-setup) repo bundles all three repos and an `install.sh` that performs sections 2 to 6 on Debian/Ubuntu. See its `NATIVE.md`.
 
 ## Credits
 The DAQ code, utilities and monitor in these repos were written by **Bruno P. Gelli** ([BrunoGelli/DAQ_Caen](https://github.com/BrunoGelli/DAQ_Caen) and [BrunoGelli/caen-dt5533e-monitor](https://github.com/BrunoGelli/caen-dt5533e-monitor)). The forks only contain small lab-specific modifications. Please credit the original repositories when using or citing this work.
