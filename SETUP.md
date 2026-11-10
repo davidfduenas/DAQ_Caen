@@ -33,7 +33,7 @@ INFLUX_DB=mydb HV_SERIAL_PORT=/dev/ttyACM0 ~/tmuxsessions/start_hvcaen.sh
 sudo apt install tmux git g++ python3-venv python3-tk python3-numpy python3-matplotlib libcurl4-openssl-dev
 ```
 (`python3-numpy` and `python3-matplotlib` are needed by `scope.py`.)
-- CAEN libraries: CAENDigitizer, CAENComm, CAENVMELib (from CAEN's Linux downloads).
+- CAEN libraries: follow Bruno Gelli's instructions in [BrunoGelli/Legacy-AmBE_DAQ_DQM](https://github.com/BrunoGelli/Legacy-AmBE_DAQ_DQM) (`README.md` and `Singularity.def`: CAENVMELib, CAENComm, caen_felib, caen_dig2, CAENDigitizer, in that order). Summary: [CONTAINER.md](https://github.com/davidfduenas/caen-lab-setup/blob/main/CONTAINER.md).
 - ROOT (default location `~/root`).
 - InfluxDB v1 and Grafana.
 
@@ -125,7 +125,7 @@ timeout 900s ./daq_threshold_v1.0.0 -n 999999999 -m self -c 0 -t 50 -r 2048 --po
 | `/dev/ttyDT5471P0` missing | udev IDs don't match `lsusb`; redo section 6. |
 | Supply silent, name present | `sudo systemctl stop ModemManager`. |
 | Permission denied on the port | `sudo usermod -aG dialout $USER`, log in again. |
-| "Failed to open digitizer" | Check the CAEN library install; if it works under `sudo`, add a USB permission rule for the digitizer. |
+| "Failed to open digitizer" | Check the CAEN library install against Bruno's instructions; if it works under `sudo`, add a USB permission rule for the digitizer. |
 | `scope` shows no window | Install `python3-tk`. |
 
 ## Automatic installation
