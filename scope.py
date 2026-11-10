@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 # ── Settings (edit if needed) ──
-DATA_DIR   = os.path.expanduser("~/DAQ_Caen/data")
+DATA_DIR   = os.environ.get("DAQ_DATA_DIR") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "data")
 N_WAVE     = 1            # how many recent waveforms to overlay
 INTERVAL   = 0.000000004         # refresh seconds
 TAIL_BYTES = 8_000_000    # bytes to read from the end of the file

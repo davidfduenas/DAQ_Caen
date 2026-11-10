@@ -1,14 +1,19 @@
 #!/usr/bin/env bash
 set -euo pipefail
-#source "/home/dduenas/DAQ_Caen/orchestrator/.env"
+# Repo root = parent of orchestrator/, wherever the repo is cloned.
+script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+repo_dir="$(cd "${script_dir}/.." && pwd)"
+
+# Optional local overrides (gitignored)
+if [[ -f "${script_dir}/.env" ]]; then source "${script_dir}/.env"; fi
 
 export INFLUX_HOST INFLUX_PORT INFLUX_DB INFLUX_USER INFLUX_PASS
 export DATA_DIR UTILS_DIR SW_BIN TH_BIN
 
 # -------- defaults if .env doesn't define them --------
-: "${UTILS_DIR:=/home/dduenas/DAQ_Caen/utils}"
-: "${DATA_DIR:=/home/dduenas/DAQ_Caen/data}"
-: "${SW_BIN:=/home/dduenas/DAQ_Caen/daq_threshold_v1.0.0}"
+: "${UTILS_DIR:=${repo_dir}/utils}"
+: "${DATA_DIR:=${repo_dir}/data}"
+: "${SW_BIN:=${repo_dir}/daq_threshold_v1.0.0}"
 : "${TH_BIN:=${SW_BIN}}"
 
 : "${DAQ_CHANNEL:=0}"
@@ -22,7 +27,7 @@ export DATA_DIR UTILS_DIR SW_BIN TH_BIN
 : "${INFLUX_DB:=NOvA_DTG_CAEN}"
 
 # -------- single-host lock to avoid CAEN collisions --------
-lock="/home/dduenas/DAQ_Caen/.caen.lock"
+lock="${CAEN_LOCK:-${repo_dir}/.caen.lock}"
 exec 9>"$lock"
 flock -n 9 || { echo "[warn] DAQ busy (lock)"; exit 0; }
 
